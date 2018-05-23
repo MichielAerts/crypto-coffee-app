@@ -1,0 +1,6 @@
+{
+  "name": "CryptoCoffee",
+  "short_name": "CryptoCoffee",
+  "start_url": "/",
+  "display": "standalone"
+}

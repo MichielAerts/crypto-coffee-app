@@ -1,0 +1,87 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-form/iron-form.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+<dom-module id="crypto-coffee-app">
+  <template>
+      <style>
+        :host {
+          display: block;
+        }
+      </style>
+      <iron-ajax
+      id="getRfid"
+      url="http://localhost:8080/api/cryptoCoffee/rfid"
+      method="GET"
+      headers='{"Accept": "*/*"}'
+      handle-as="json"
+      on-response="handleRfidResponse"
+      debounce-duration="1000">
+      </iron-ajax>
+      <iron-form id="registration">
+        <form action="/foo" method="post" enctype="application/json">
+          <paper-input type="text" name="firstName" required label="First name"></paper-input>
+          <paper-input type="text" name="lastName" required label="Last Name"></paper-input>
+          <paper-input type="text" name="coporateKey" required label="Corporate Key"></paper-input>
+          <paper-input type="text" name="ingMail" required label="ING emailaddress"></paper-input>
+          <paper-input type="text" name="gMail" label="Gmail emailaddress"></paper-input>
+          
+          <p>To identify you we need to scan your Rfid token<br>1. Click the button below<br>2. Hold your token against the scanner until you see your Id appearing on screen<br></p>
+          <paper-button raised on-click="_scanRfid">[[scanRfidStatus]]</paper-button>
+          <p>[[_getRfid()]]</p>
+          <br><br>
+          <paper-button raised on-click="_submit">Submit</paper-button>
+          </form>
+        <div class="output"></div>
+      </iron-form>
+    </template>
+    <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class CryptoCoffeeApp extends Polymer.Element {
+      static get is() { return 'crypto-coffee-app'; }
+      static get properties() {
+        return {
+          rfid: {
+            type: String,
+            reflectToAttribute: true,
+          },
+          scanRfidStatus: {
+            type: String,
+            reflectToAttribute: true,
+            value: "Scan RFID"
+          }
+        }
+      }
+    
+     constructor() {
+        super();
+      }
+
+      _getRfid() {
+        return this.rfid === undefined ? "No rfid found yet" : "rfid";
+      }
+
+
+      _scanRfid() {
+        this.scanRfidStatus = "Scanning..";
+        this.$.getRfid.generateRequest();
+      }
+
+      _handleRfidResponse(data) {
+       this.scanRfidStatus = "Scanned";
+       this.rfid = data;  
+      }
+
+      _submit() {
+        this.$.registration.submit();
+      }
+    }
+
+    window.customElements.define(CryptoCoffeeApp.is, CryptoCoffeeApp);
+  </script>
+</dom-module>
