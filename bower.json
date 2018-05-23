@@ -1,5 +1,5 @@
 {
-  "name": "CryptoCoffee",
+  "name": "crypto-coffee-app",
   "main": "index.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",

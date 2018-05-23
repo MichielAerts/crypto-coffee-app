@@ -1,6 +1,6 @@
 {
-  "name": "CryptoCoffee",
-  "short_name": "CryptoCoffee",
+  "name": "crypto-coffee-app",
+  "short_name": "crypto-coffee-app",
   "start_url": "/",
   "display": "standalone"
 }
