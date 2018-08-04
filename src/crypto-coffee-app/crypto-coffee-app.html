@@ -3,6 +3,7 @@
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="components/polymer/lib/elements/dom-if.html">
 
 <dom-module id="crypto-coffee-app">
   <template>
@@ -12,30 +13,44 @@
         }
       </style>
       <iron-ajax
-      id="getRfid"
-      url="http://localhost:8080/api/cryptoCoffee/rfid"
-      method="GET"
-      headers='{"Accept": "*/*"}'
-      handle-as="json"
-      on-response="handleRfidResponse"
-      debounce-duration="1000">
+        id="getRfid"
+        url="http://localhost:8080/api/cryptoCoffee/rfid"
+        method="GET"
+        headers='{"Accept": "*/*"}'
+        handle-as="json"
+        on-response="handleRfidResponse"
+        debounce-duration="1000">
       </iron-ajax>
-      <iron-form id="registration">
-        <form action="/foo" method="post" enctype="application/json">
-          <paper-input type="text" name="firstName" required label="First name"></paper-input>
-          <paper-input type="text" name="lastName" required label="Last Name"></paper-input>
-          <paper-input type="text" name="coporateKey" required label="Corporate Key"></paper-input>
-          <paper-input type="text" name="ingMail" required label="ING emailaddress"></paper-input>
-          <paper-input type="text" name="gMail" label="Gmail emailaddress"></paper-input>
-          
-          <p>To identify you we need to scan your Rfid token<br>1. Click the button below<br>2. Hold your token against the scanner until you see your Id appearing on screen<br></p>
-          <paper-button raised on-click="_scanRfid">[[scanRfidStatus]]</paper-button>
-          <p>[[_getRfid()]]</p>
-          <br><br>
-          <paper-button raised on-click="_submit">Submit</paper-button>
+      <iron-ajax
+        id="registrationMode"
+        url="http://localhost:8080/api/cryptoCoffee/rfid/mode"
+        method="POST"
+        content-type="application/json"
+        body='{"registrationMode" : [[registrationButtonClicked]]}'
+        headers='{"Accept": "*/*"}'
+        handle-as="json"
+        on-response="handleRfidResponse"
+        debounce-duration="1000">
+      </iron-ajax>
+      <paper-button raised on-click="_registerButtonClick">Register</paper-button>
+      <template is="dom-if" if="{{registrationButtonClicked}}">
+        <iron-form id="registration">
+          <form action="/foo" method="post" enctype="application/json">
+            <paper-input type="text" name="firstName" required label="First name"></paper-input>
+            <paper-input type="text" name="lastName" required label="Last Name"></paper-input>
+            <paper-input type="text" name="coporateKey" required label="Corporate Key"></paper-input>
+            <paper-input type="text" name="ingMail" required label="ING emailaddress"></paper-input>
+            <paper-input type="text" name="gMail" label="Gmail emailaddress"></paper-input>
+            
+            <p>To identify you we need to scan your Rfid token<br>1. Click the button below<br>2. Hold your token against the scanner until you see your Id appearing on screen<br></p>
+            <paper-button raised on-click="_scanRfid">[[scanRfidStatus]]</paper-button>
+            <p>[[_getRfid()]]</p>
+            <br><br>
+            <paper-button raised on-click="_submit">Submit</paper-button>
           </form>
-        <div class="output"></div>
-      </iron-form>
+          <div class="output"></div>
+        </iron-form>
+      </template>
     </template>
     <script>
     /**
@@ -54,6 +69,11 @@
             type: String,
             reflectToAttribute: true,
             value: "Scan RFID"
+          },
+          registrationButtonClicked: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
           }
         }
       }
@@ -66,6 +86,10 @@
         return this.rfid === undefined ? "No rfid found yet" : "rfid";
       }
 
+      _registerButtonClick() {
+          this.registrationButtonClicked = !this.registrationButtonClicked;
+          this.$.registrationMode.generateRequest();
+      }
 
       _scanRfid() {
         this.scanRfidStatus = "Scanning..";
