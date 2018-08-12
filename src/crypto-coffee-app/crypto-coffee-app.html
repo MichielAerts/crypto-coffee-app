@@ -2,8 +2,10 @@
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-radio-button/paper-radio-button.html">
+<link rel="import" href="../../bower_components/paper-radio-group/paper-radio-group.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
-<link rel="import" href="components/polymer/lib/elements/dom-if.html">
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-if.html">
 
 <dom-module id="crypto-coffee-app">
   <template>
@@ -14,26 +16,31 @@
       </style>
       <iron-ajax
         id="getRfid"
-        url="http://localhost:8080/api/cryptoCoffee/rfid"
+        url="http://localhost:8088/api/cryptoCoffee/rfid/registration"
         method="GET"
         headers='{"Accept": "*/*"}'
         handle-as="json"
-        on-response="handleRfidResponse"
+        on-response="_handleRfidResponse"
         debounce-duration="1000">
       </iron-ajax>
       <iron-ajax
-        id="registrationMode"
-        url="http://localhost:8080/api/cryptoCoffee/rfid/mode"
+        id="setMode"
+        url="http://localhost:8088/api/cryptoCoffee/rfid/mode"
         method="POST"
         content-type="application/json"
-        body='{"registrationMode" : [[registrationButtonClicked]]}'
+        body='{"coffeeMode" : [[inCoffeeMode]]}'
         headers='{"Accept": "*/*"}'
-        handle-as="json"
-        on-response="handleRfidResponse"
         debounce-duration="1000">
       </iron-ajax>
-      <paper-button raised on-click="_registerButtonClick">Register</paper-button>
-      <template is="dom-if" if="{{registrationButtonClicked}}">
+      <paper-radio-group selected="coffee">
+          <paper-radio-button name="coffee" on-click="_coffeeModeSelected">Make Coffee!</paper-radio-button>
+          <paper-radio-button name="registration" on-click="_registrationModeSelected">Register!</paper-radio-button>
+      </paper-radio-group>
+      <!--<paper-button raised on-click="_registerButtonClick">Register</paper-button>-->
+      <template is="dom-if" if="{{inCoffeeMode}}">
+        <p>Hold your rfid before the scanner to make coffee!</p>  
+      </template>
+      <template is="dom-if" if="{{inRegistrationMode}}">
         <iron-form id="registration">
           <form action="/foo" method="post" enctype="application/json">
             <paper-input type="text" name="firstName" required label="First name"></paper-input>
@@ -70,7 +77,12 @@
             reflectToAttribute: true,
             value: "Scan RFID"
           },
-          registrationButtonClicked: {
+          inCoffeeMode: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: true
+          },
+          inRegistrationMode: {
             type: Boolean,
             reflectToAttribute: true,
             value: false
@@ -82,13 +94,20 @@
         super();
       }
 
-      _getRfid() {
-        return this.rfid === undefined ? "No rfid found yet" : "rfid";
+      _coffeeModeSelected() {
+        this.inCoffeeMode = true;
+        this.inRegistrationMode = false;
+        this.$.setMode.generateRequest();
       }
 
-      _registerButtonClick() {
-          this.registrationButtonClicked = !this.registrationButtonClicked;
-          this.$.registrationMode.generateRequest();
+      _registrationModeSelected() {
+        this.inCoffeeMode = false;
+        this.inRegistrationMode = true;
+        this.$.setMode.generateRequest();
+      }
+
+      _getRfid() {
+        return this.rfid === undefined ? "No rfid found yet" : "rfid";
       }
 
       _scanRfid() {
@@ -96,9 +115,9 @@
         this.$.getRfid.generateRequest();
       }
 
-      _handleRfidResponse(data) {
+      _handleRfidResponse(e) {
        this.scanRfidStatus = "Scanned";
-       this.rfid = data;  
+       this.rfid = e.detail.response;  
       }
 
       _submit() {
