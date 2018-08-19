@@ -41,17 +41,16 @@
         <p>Hold your rfid before the scanner to make coffee!</p>  
       </template>
       <template is="dom-if" if="{{inRegistrationMode}}">
-        <iron-form id="registration">
-          <form action="/foo" method="post" enctype="application/json">
+        <iron-form id="registration" on-iron-form-response="_handleFormResponse">
+          <form action="http://localhost:8088/api/cryptoCoffee/user" method="post" enctype="application/json">
             <paper-input type="text" name="firstName" required label="First name"></paper-input>
             <paper-input type="text" name="lastName" required label="Last Name"></paper-input>
-            <paper-input type="text" name="coporateKey" required label="Corporate Key"></paper-input>
+            <paper-input type="text" name="corporateKey" required label="Corporate Key"></paper-input>
             <paper-input type="text" name="ingMail" required label="ING emailaddress"></paper-input>
-            <paper-input type="text" name="gMail" label="Gmail emailaddress"></paper-input>
-            
-            <p>To identify you we need to scan your Rfid token<br>1. Click the button below<br>2. Hold your token against the scanner until you see your Id appearing on screen<br></p>
+            <paper-input type="text" name="googleMail" label="Gmail emailaddress"></paper-input>
+            <paper-input type="hidden" name="rfid" value="[[rfid]]"></paper-input>
+            <p>To identify you we need to scan your Rfid token<br>1. Click the button below<br>2. Hold your token against the scanner until you the button shows Scanned<br></p>
             <paper-button raised on-click="_scanRfid">[[scanRfidStatus]]</paper-button>
-            <p>[[_getRfid()]]</p>
             <br><br>
             <paper-button raised on-click="_submit">Submit</paper-button>
           </form>
@@ -116,12 +115,21 @@
       }
 
       _handleRfidResponse(e) {
-       this.scanRfidStatus = "Scanned";
-       this.rfid = e.detail.response;  
+       if (e.detail.response) {
+         this.scanRfidStatus = "Scanned";
+         this.rfid = e.detail.response;  
+        }
+      }
+
+      _handleFormResponse(e) {
+       if (e.detail.__data.status === 202) {
+         this.scanRfidStatus = "Registered!";
+        }
       }
 
       _submit() {
-        this.$.registration.submit();
+        var form = Polymer.dom(this.root).querySelector('#registration');
+        form.submit();
       }
     }
 
