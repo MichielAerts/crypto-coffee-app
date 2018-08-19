@@ -117,7 +117,7 @@
       _handleRfidResponse(e) {
        if (e.detail.response) {
          this.scanRfidStatus = "Scanned";
-         this.rfid = e.detail.response;  
+         this.rfid = e.detail.response.rfid;  
         }
       }
 
