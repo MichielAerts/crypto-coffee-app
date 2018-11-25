@@ -16,7 +16,7 @@
       </style>
       <iron-ajax
         id="getRfid"
-        url="http://localhost:8088/api/cryptoCoffee/rfid/registration"
+        url="http://192.168.1.39:8088/api/cryptoCoffee/rfid/registration"
         method="GET"
         headers='{"Accept": "*/*"}'
         handle-as="json"
@@ -25,7 +25,7 @@
       </iron-ajax>
       <iron-ajax
         id="setMode"
-        url="http://localhost:8088/api/cryptoCoffee/rfid/mode"
+        url="http://192.168.1.39:8088/api/cryptoCoffee/rfid/mode"
         method="POST"
         content-type="application/json"
         body='{"coffeeMode" : [[inCoffeeMode]]}'
@@ -43,7 +43,7 @@
       <template is="dom-if" if="{{inRegistrationMode}}">
         <iron-form id="registration" on-iron-form-response="_handleFormResponse" 
         on-iron-form-error="_handleFormError">
-          <form action="http://localhost:8088/api/cryptoCoffee/user" method="post" enctype="application/json">
+          <form action="http://192.168.1.39:8088/api/cryptoCoffee/user" method="post" enctype="application/json">
             <paper-input type="text" name="firstName" required label="First name"></paper-input>
             <paper-input type="text" name="lastName" required label="Last Name"></paper-input>
             <paper-input type="text" name="corporateKey" required label="Corporate Key"></paper-input>
